@@ -71,3 +71,19 @@ d1= d %>%
 pairs(data=d1, ~.)
 ```
 
+
+In class dplyr challenge
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+d2 = d %>% 
+  mutate("Binomial" =paste(Genus, Species, sep=",")) %>% 
+  select(Binomial, Family, Genus, Brain_Size_Species_Mean, Body_mass_male_mean, Body_mass_female_mean) %>% 
+  group_by(Family) %>% 
+  summarise(avg1 = mean(Brain_Size_Species_Mean, na.rm = TRUE),
+            avg2 = mean(Body_mass_male_mean, na.rm = TRUE),
+            na.rm = TRUE) %>% 
+  arrange(desc(avg1))
+d2
+```
