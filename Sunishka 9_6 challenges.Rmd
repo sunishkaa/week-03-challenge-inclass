@@ -1,0 +1,73 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+Loading all libraries
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(sjmisc)
+library(ggplot2)
+library(skimr)
+library(kableExtra)
+```
+
+```{r, echo=FALSE}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+head(d)
+s <- skim(d) # formats results to a wide table
+# here we make use of the `%>%` operator and {dplyr} verbs... see below
+s %>%
+  filter(skim_variable == "Scientific_Name" | skim_type == "numeric") %>%
+  rename(variable=skim_variable, missing=n_missing, mean=numeric.mean,
+    sd=numeric.sd, min=numeric.p0, p25=numeric.p25, median=numeric.p50,
+    p75=numeric.p75, max=numeric.p100, hist=numeric.hist) %>%
+  select(variable, missing, mean, sd, min, median, max, hist) %>%
+  # drop p25 and p75 for purposes of display
+  kable() %>%
+  kable_styling(font_size = 10)
+detach(package:skimr)
+detach(package:kableExtra)
+```
+
+Challenge 1: Making boxplots of log(female body mass) ~ family
+
+```{r}
+boxplot(log(d$Body_mass_female_mean)~d$Family)
+
+ggplot(data = d, aes(x=Family, y=log(Body_mass_female_mean)))+
+  geom_boxplot(na.rm=TRUE)
+```
+
+Challenge 2: plot the relationship between female body size and female brain size.
+
+```{r}
+
+plot(x=d$Brain_Size_Female_Mean, y=d$Body_mass_female_mean)
+plot(x=log(d$Brain_Size_Female_Mean), y=log(d$Body_mass_female_mean))
+
+ggplot(data=d, aes(x=Brain_Size_Female_Mean, y=Body_mass_female_mean))+
+  geom_point(na.rm = TRUE)
+```
+
+Challenge 3: Build your own bivariate scatterplot of log(MaxLongevity_m) by log(Body_mass_female_mean) using the “KamilarAndCooperData” dataset.
+
+```{r}
+ggplot(data=d, aes(x=log(MaxLongevity_m), y=log(Body_mass_female_mean)))+
+  geom_point(na.rm=TRUE)+
+  geom_smooth(method = "lm", color="blue")
+
+```
+
+Challenge 4: Select the variables Brain_Size_Female_Mean, Body_mass_female_mean, MeanGroupSize, WeaningAge_d, MaxLongevity_m, HomeRange_km2, and DayLength_km from data frame d and plot scatterplots of all pairs of variables.
+
+```{r}
+d1= d %>% 
+  select(Brain_Size_Female_Mean, Body_mass_female_mean, MeanGroupSize, WeaningAge_d, MaxLongevity_m, HomeRange_km2, DayLength_km)
+pairs(data=d1, ~.)
+```
+
